@@ -1,29 +1,62 @@
+import logging
+from typing import NoReturn
+
 from fastapi import APIRouter, HTTPException, status
 
+from api.operations import (
+    AddIngredientUnitOperation,
+    CreateGenericUnitOperation,
+    CreateIngredientOperation,
+    GetIngredientOperation,
+    HealthcheckOperation,
+)
 from models.api_models import (
     AddIngredientUnitRequest,
     CreateGenericUnitRequest,
-    CreateIngredientRequest,
-    GenericUnitResponse,
     IngredientResponse,
     IngredientUnitResponse,
+    CreateIngredientRequest,
+    GenericUnitResponse,
 )
-from models.generic_unit import GenericUnit
-from models.ingredient.ingredient import Ingredient
-from services.errors import DuplicateResourceError
-from services.generic_unit import GenericUnitService
-from services.ingredient import IngredientService
+from services.errors import DuplicateResourceError, ResourceNotFoundError
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-ingredient_service = IngredientService()
-generic_unit_service = GenericUnitService()
+healthcheck_operation = HealthcheckOperation()
+create_generic_unit_operation = CreateGenericUnitOperation()
+create_ingredient_operation = CreateIngredientOperation()
+get_ingredient_operation = GetIngredientOperation()
+add_ingredient_unit_operation = AddIngredientUnitOperation()
+
+
+def _handle_operation_error(error: Exception) -> NoReturn:
+    if isinstance(error, DuplicateResourceError):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(error),
+        ) from error
+
+    if isinstance(error, ResourceNotFoundError):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+
+    logger.exception("Unhandled endpoint error")
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="An unexpected error occurred.",
+    ) from error
 
 
 @router.get("/health")
 def healthcheck() -> dict[str, str]:
-    return {"status": "ok"}
+    try:
+        return healthcheck_operation.execute()
+    except Exception as error:
+        _handle_operation_error(error)
 
 
 @router.post(
@@ -32,20 +65,10 @@ def healthcheck() -> dict[str, str]:
     status_code=status.HTTP_201_CREATED,
 )
 def create_generic_unit(request: CreateGenericUnitRequest) -> GenericUnitResponse:
-    generic_unit = GenericUnit(
-        id=request.id,
-        name=request.name,
-        measurement_type=request.measurement_type,
-    )
     try:
-        created_generic_unit = generic_unit_service.create_generic_unit(generic_unit)
-    except DuplicateResourceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(exc),
-        ) from exc
-
-    return GenericUnitResponse(generic_unit=created_generic_unit)
+        return create_generic_unit_operation.execute(request)
+    except Exception as error:
+        _handle_operation_error(error)
 
 
 @router.post(
@@ -54,20 +77,10 @@ def create_generic_unit(request: CreateGenericUnitRequest) -> GenericUnitRespons
     status_code=status.HTTP_201_CREATED,
 )
 def create_ingredient(request: CreateIngredientRequest) -> IngredientResponse:
-    ingredient = Ingredient(
-        id=request.id,
-        name=request.name,
-        staple=request.staple,
-    )
     try:
-        created_ingredient = ingredient_service.create_ingredient(ingredient)
-    except DuplicateResourceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(exc),
-        ) from exc
-
-    return IngredientResponse(ingredient=created_ingredient)
+        return create_ingredient_operation.execute(request)
+    except Exception as error:
+        _handle_operation_error(error)
 
 
 @router.get(
@@ -75,14 +88,10 @@ def create_ingredient(request: CreateIngredientRequest) -> IngredientResponse:
     response_model=IngredientResponse,
 )
 def get_ingredient(ingredient_id: str) -> IngredientResponse:
-    ingredient = ingredient_service.get_ingredient_by_id(ingredient_id)
-    if ingredient is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Ingredient '{ingredient_id}' was not found.",
-        )
-
-    return IngredientResponse(ingredient=ingredient)
+    try:
+        return get_ingredient_operation.execute(ingredient_id)
+    except Exception as error:
+        _handle_operation_error(error)
 
 
 @router.post(
@@ -94,27 +103,7 @@ def add_ingredient_unit(
     ingredient_id: str,
     request: AddIngredientUnitRequest,
 ) -> IngredientUnitResponse:
-    generic_unit = generic_unit_service.get_generic_unit_by_id(request.generic_unit_id)
-    if generic_unit is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Generic unit '{request.generic_unit_id}' was not found.",
-        )
-
     try:
-        ingredient, ingredient_unit = ingredient_service.add_unit_to_ingredient(
-            ingredient_id=ingredient_id,
-            generic_unit=generic_unit,
-            size=request.size,
-            gram_weight=request.gram_weight,
-        )
-    except LookupError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-
-    return IngredientUnitResponse(
-        ingredient=ingredient,
-        ingredient_unit=ingredient_unit,
-    )
+        return add_ingredient_unit_operation.execute(ingredient_id, request)
+    except Exception as error:
+        _handle_operation_error(error)

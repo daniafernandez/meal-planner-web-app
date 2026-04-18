@@ -2,7 +2,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from api.resources.endpoints import generic_unit_service, ingredient_service, router
+from api.resources.endpoints import router
+from services.generic_unit import GenericUnitService
+from services.ingredient import IngredientService
+
+
+ingredient_service = IngredientService()
+generic_unit_service = GenericUnitService()
 
 
 @asynccontextmanager
