@@ -1,7 +1,7 @@
 import logging
-from typing import NoReturn
+from typing import Annotated, NoReturn
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.operations import (
     AddIngredientUnitOperation,
@@ -25,6 +25,36 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+def get_healthcheck_operation() -> HealthcheckOperation:
+    return HealthcheckOperation()
+
+
+def get_create_generic_unit_operation(
+    request: CreateGenericUnitRequest,
+) -> CreateGenericUnitOperation:
+    return CreateGenericUnitOperation(request=request)
+
+
+def get_create_ingredient_operation(
+    request: CreateIngredientRequest,
+) -> CreateIngredientOperation:
+    return CreateIngredientOperation(request=request)
+
+
+def get_get_ingredient_operation(ingredient_id: str) -> GetIngredientOperation:
+    return GetIngredientOperation(ingredient_id=ingredient_id)
+
+
+def get_add_ingredient_unit_operation(
+    ingredient_id: str,
+    request: AddIngredientUnitRequest,
+) -> AddIngredientUnitOperation:
+    return AddIngredientUnitOperation(
+        ingredient_id=ingredient_id,
+        request=request,
+    )
+
+
 def _handle_operation_error(error: Exception) -> NoReturn:
     if isinstance(error, DuplicateResourceError):
         raise HTTPException(
@@ -46,9 +76,11 @@ def _handle_operation_error(error: Exception) -> NoReturn:
 
 
 @router.get("/health")
-def healthcheck() -> dict[str, str]:
+def healthcheck(
+    operation: Annotated[HealthcheckOperation, Depends(get_healthcheck_operation)],
+) -> dict[str, str]:
     try:
-        return HealthcheckOperation().execute()
+        return operation.execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -58,9 +90,14 @@ def healthcheck() -> dict[str, str]:
     response_model=GenericUnitResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_generic_unit(request: CreateGenericUnitRequest) -> GenericUnitResponse:
+def create_generic_unit(
+    operation: Annotated[
+        CreateGenericUnitOperation,
+        Depends(get_create_generic_unit_operation),
+    ],
+) -> GenericUnitResponse:
     try:
-        return CreateGenericUnitOperation(request=request).execute()
+        return operation.execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -70,9 +107,14 @@ def create_generic_unit(request: CreateGenericUnitRequest) -> GenericUnitRespons
     response_model=IngredientResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_ingredient(request: CreateIngredientRequest) -> IngredientResponse:
+def create_ingredient(
+    operation: Annotated[
+        CreateIngredientOperation,
+        Depends(get_create_ingredient_operation),
+    ],
+) -> IngredientResponse:
     try:
-        return CreateIngredientOperation(request=request).execute()
+        return operation.execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -81,9 +123,14 @@ def create_ingredient(request: CreateIngredientRequest) -> IngredientResponse:
     "/ingredients/{ingredient_id}",
     response_model=IngredientResponse,
 )
-def get_ingredient(ingredient_id: str) -> IngredientResponse:
+def get_ingredient(
+    operation: Annotated[
+        GetIngredientOperation,
+        Depends(get_get_ingredient_operation),
+    ],
+) -> IngredientResponse:
     try:
-        return GetIngredientOperation(ingredient_id=ingredient_id).execute()
+        return operation.execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -94,13 +141,12 @@ def get_ingredient(ingredient_id: str) -> IngredientResponse:
     status_code=status.HTTP_201_CREATED,
 )
 def add_ingredient_unit(
-    ingredient_id: str,
-    request: AddIngredientUnitRequest,
+    operation: Annotated[
+        AddIngredientUnitOperation,
+        Depends(get_add_ingredient_unit_operation),
+    ],
 ) -> IngredientUnitResponse:
     try:
-        return AddIngredientUnitOperation(
-            ingredient_id=ingredient_id,
-            request=request,
-        ).execute()
+        return operation.execute()
     except Exception as error:
         _handle_operation_error(error)
