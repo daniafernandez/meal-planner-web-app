@@ -24,12 +24,6 @@ from services.errors import DuplicateResourceError, ResourceNotFoundError
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-healthcheck_operation = HealthcheckOperation()
-create_generic_unit_operation = CreateGenericUnitOperation()
-create_ingredient_operation = CreateIngredientOperation()
-get_ingredient_operation = GetIngredientOperation()
-add_ingredient_unit_operation = AddIngredientUnitOperation()
-
 
 def _handle_operation_error(error: Exception) -> NoReturn:
     if isinstance(error, DuplicateResourceError):
@@ -54,7 +48,7 @@ def _handle_operation_error(error: Exception) -> NoReturn:
 @router.get("/health")
 def healthcheck() -> dict[str, str]:
     try:
-        return healthcheck_operation.execute()
+        return HealthcheckOperation().execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -66,7 +60,7 @@ def healthcheck() -> dict[str, str]:
 )
 def create_generic_unit(request: CreateGenericUnitRequest) -> GenericUnitResponse:
     try:
-        return create_generic_unit_operation.execute(request)
+        return CreateGenericUnitOperation(request=request).execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -78,7 +72,7 @@ def create_generic_unit(request: CreateGenericUnitRequest) -> GenericUnitRespons
 )
 def create_ingredient(request: CreateIngredientRequest) -> IngredientResponse:
     try:
-        return create_ingredient_operation.execute(request)
+        return CreateIngredientOperation(request=request).execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -89,7 +83,7 @@ def create_ingredient(request: CreateIngredientRequest) -> IngredientResponse:
 )
 def get_ingredient(ingredient_id: str) -> IngredientResponse:
     try:
-        return get_ingredient_operation.execute(ingredient_id)
+        return GetIngredientOperation(ingredient_id=ingredient_id).execute()
     except Exception as error:
         _handle_operation_error(error)
 
@@ -104,6 +98,9 @@ def add_ingredient_unit(
     request: AddIngredientUnitRequest,
 ) -> IngredientUnitResponse:
     try:
-        return add_ingredient_unit_operation.execute(ingredient_id, request)
+        return AddIngredientUnitOperation(
+            ingredient_id=ingredient_id,
+            request=request,
+        ).execute()
     except Exception as error:
         _handle_operation_error(error)
