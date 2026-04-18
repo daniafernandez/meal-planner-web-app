@@ -1,8 +1,10 @@
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from pymongo.errors import DuplicateKeyError
 
 from models.project_model import ProjectModel
 from settings import MongoSettings
+from services.errors import DuplicateResourceError
 
 
 class ProjectModelService:
@@ -27,7 +29,10 @@ class ProjectModelService:
 
     def insert_one_item(self, data: ProjectModel) -> int:
         doc = data.model_dump()
-        result = self.collection.insert_one(doc)
+        try:
+            result = self.collection.insert_one(doc)
+        except DuplicateKeyError as exc:
+            raise DuplicateResourceError(f"Duplicate id '{data.id}'.") from exc
         return result.inserted_id
 
     def insert_many_items(self, data: list[ProjectModel]) -> list[int]:
@@ -36,5 +41,5 @@ class ProjectModelService:
         return result.inserted_ids
 
     def get_one_item_by_id(self, id: str) -> ProjectModel:
-        item = self.collection.find_one({'_id': id})
+        item = self.collection.find_one({"id": id})
         return ProjectModel(**item)
