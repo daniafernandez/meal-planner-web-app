@@ -1,6 +1,7 @@
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from models.ingredient.ingredient_unit import IngredientUnit
+from services.errors import ResourceNotFoundError
 from services.project_model import ProjectModelService
 
 
@@ -34,10 +35,12 @@ class IngredientService(ProjectModelService):
             {"$push": {"units": ingredient_unit.model_dump()}},
         )
         if result.matched_count == 0:
-            raise LookupError(f"Ingredient '{ingredient_id}' was not found.")
+            raise ResourceNotFoundError(f"Ingredient '{ingredient_id}' was not found.")
 
         updated_ingredient = self.get_ingredient_by_id(ingredient_id)
         if updated_ingredient is None:
-            raise LookupError(f"Ingredient '{ingredient_id}' was not found after update.")
+            raise ResourceNotFoundError(
+                f"Ingredient '{ingredient_id}' was not found after update.",
+            )
 
         return updated_ingredient, ingredient_unit

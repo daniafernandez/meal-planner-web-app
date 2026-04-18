@@ -11,3 +11,13 @@ dependencies = [
     "pymongo>=4.16.0",
     "uvicorn>=0.32.0",
 ]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.4.1",
+]
+
+[tool.pytest.ini_options]
+addopts = "-p no:cacheprovider"
+testpaths = ["tests"]
