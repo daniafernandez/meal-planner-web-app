@@ -2,17 +2,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, status
 
-from models.generic_unit import GenericUnit
-from models.generic_unit_api_models import (
-    CreateGenericUnitRequest,
-    GenericUnitResponse,
-)
-from models.ingredient.api_models import (
+from models.api_models import (
     AddIngredientUnitRequest,
+    CreateGenericUnitRequest,
     CreateIngredientRequest,
+    GenericUnitResponse,
     IngredientResponse,
     IngredientUnitResponse,
 )
+from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from services.errors import DuplicateResourceError
 from services.generic_unit import GenericUnitService
