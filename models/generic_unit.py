@@ -9,6 +9,7 @@ class MeasurementType(StrEnum):
     COUNT = "COUNT"
     MASS = "MASS"
     VOLUME = "VOLUME"
+    INFORMAL = "INFORMAL"
 
 
 class GenericUnit(ProjectModel):
