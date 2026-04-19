@@ -9,6 +9,7 @@ class IngredientService(ProjectModelService):
     collection_name = "ingredients"
 
     def create_ingredient(self, ingredient: Ingredient) -> Ingredient:
+        self.validate_unique_field("name", ingredient.name)
         self.insert_one_item(ingredient)
         return ingredient
 

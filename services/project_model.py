@@ -73,6 +73,10 @@ class ProjectModelService:
             raise DuplicateResourceError(f"Duplicate id '{data.id}'.") from exc
         return result.inserted_id
 
+    def validate_unique_field(self, field_name: str, field_value: Any) -> None:
+        if self.collection.find_one({field_name: field_value}) is not None:
+            raise DuplicateResourceError(f"Duplicate {field_name} '{field_value}'.")
+
     def insert_many_items(self, data: list[ProjectModel]) -> list[int]:
         docs = [item.model_dump() for item in data]
         result = self.collection.insert_many(docs)

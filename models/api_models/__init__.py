@@ -6,7 +6,6 @@ from models.ingredient.ingredient_unit import IngredientUnit
 
 
 class CreateGenericUnitRequest(BaseModel):
-    id: str
     name: str
     measurement_type: MeasurementType
 
@@ -16,7 +15,6 @@ class GenericUnitResponse(BaseModel):
 
 
 class CreateIngredientRequest(BaseModel):
-    id: str
     name: str
     staple: bool = False
 

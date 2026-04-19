@@ -14,7 +14,9 @@ generic_unit_service = GenericUnitService()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     ingredient_service.collection.create_index("id", unique=True)
+    ingredient_service.collection.create_index("name", unique=True)
     generic_unit_service.collection.create_index("id", unique=True)
+    generic_unit_service.collection.create_index("name", unique=True)
     yield
 
 
