@@ -4,7 +4,7 @@ import pytest
 
 from api.operations import CreateGenericUnitOperation
 from models.api_models import GenericUnitResponse
-from models.generic_unit import GenericUnit
+from models.generic_unit import GenericUnit, MeasurementType
 from services.errors import DuplicateResourceError
 from tests.factories import (
     build_create_generic_unit_request,
@@ -24,7 +24,7 @@ def test_create_generic_unit_build_generic_unit() -> None:
 
     UUID(generic_unit.id)
     assert generic_unit.name == "bag"
-    assert generic_unit.measurement_type == request.measurement_type
+    assert generic_unit.measurement_type == MeasurementType.COUNT
 
 
 def test_create_generic_unit_delegates_to_service() -> None:
@@ -47,7 +47,6 @@ def test_create_generic_unit_rejects_duplicate_name() -> None:
     duplicate_named_unit = GenericUnit(
         id="box",
         name="bag",
-        measurement_type=build_generic_unit().measurement_type,
     )
     operation = CreateGenericUnitOperation(
         request=build_create_generic_unit_request(),
@@ -56,6 +55,52 @@ def test_create_generic_unit_rejects_duplicate_name() -> None:
 
     with pytest.raises(DuplicateResourceError, match="Duplicate name 'bag'."):
         operation.create_generic_unit(duplicate_named_unit)
+
+
+def build_equivalent_generic_unit_service():
+    generic_unit_service = build_generic_unit_service()
+    generic_unit_service.create_generic_unit(
+        GenericUnit(
+            id="lb",
+            name="lb",
+        ),
+    )
+    return generic_unit_service
+
+
+def build_equivalent_named_unit() -> GenericUnit:
+    return GenericUnit(
+        id="pound",
+        name="pound",
+    )
+
+
+def test_create_generic_unit_rejects_equivalent_name() -> None:
+    generic_unit_service = build_equivalent_generic_unit_service()
+    equivalent_named_unit = build_equivalent_named_unit()
+    operation = CreateGenericUnitOperation(
+        request=build_create_generic_unit_request(),
+        generic_unit_service=generic_unit_service,
+    )
+
+    with pytest.raises(
+        DuplicateResourceError,
+        match='Equivalent generic unit with name: "lb" already exists.',
+    ):
+        operation.create_generic_unit(equivalent_named_unit)
+
+
+def test_create_generic_unit_does_not_insert_equivalent_name() -> None:
+    generic_unit_service = build_equivalent_generic_unit_service()
+    equivalent_named_unit = build_equivalent_named_unit()
+    operation = CreateGenericUnitOperation(
+        request=build_create_generic_unit_request(),
+        generic_unit_service=generic_unit_service,
+    )
+
+    with pytest.raises(DuplicateResourceError):
+        operation.create_generic_unit(equivalent_named_unit)
+    assert generic_unit_service.get_generic_unit_by_id("pound") is None
 
 
 def test_create_generic_unit_validate_created_generic_unit_requires_created_unit() -> None:
