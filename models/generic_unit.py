@@ -9,7 +9,7 @@ class MeasurementType(StrEnum):
     COUNT = "COUNT"
     MASS = "MASS"
     VOLUME = "VOLUME"
-    INFORMAL = "INFORMAL"
+    INFORMAL = "INFORMAL"   # imprecise measurements like pinch, dollop, etc.
 
 
 class GenericUnit(ProjectModel):
