@@ -73,9 +73,12 @@ def test_add_ingredient_unit_delegates_to_service() -> None:
         generic_unit_service=generic_unit_service,
     )
 
-    result = operation.add_generic_unit_to_ingredient(generic_unit)
+    update_result, added_ingredient_unit = operation.add_generic_unit_to_ingredient(
+        generic_unit,
+    )
 
-    assert result == (ingredient, ingredient_unit)
+    assert update_result.matched_count == 1
+    assert added_ingredient_unit == ingredient_unit
     assert ingredient_service.get_ingredient_by_id("rice") == ingredient
 
 
@@ -148,3 +151,5 @@ def test_add_ingredient_unit_execute() -> None:
     )
     assert operation.ingredient == ingredient
     assert operation.ingredient_unit == ingredient_unit
+    assert operation.update_result is not None
+    assert operation.update_result.matched_count == 1
