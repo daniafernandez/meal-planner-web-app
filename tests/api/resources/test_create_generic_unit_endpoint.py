@@ -34,7 +34,7 @@ def test_create_generic_unit_endpoint_translates_unexpected_errors_to_500() -> N
 
         response = client.post(
             "/generic-units",
-            json={"id": "bag", "name": "bag", "measurement_type": "COUNT"},
+            json={"name": "bag", "measurement_type": "COUNT"},
         )
 
     assert response.status_code == 500
@@ -49,7 +49,7 @@ def test_create_generic_unit_endpoint_translates_duplicate_resource_errors_to_40
 
         response = client.post(
             "/generic-units",
-            json={"id": "bag", "name": "bag", "measurement_type": "COUNT"},
+            json={"name": "bag", "measurement_type": "COUNT"},
         )
 
     assert response.status_code == 409

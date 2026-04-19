@@ -17,7 +17,6 @@ class CreateGenericUnitOperation(Operation):
 
     def build_generic_unit(self) -> GenericUnit:
         return GenericUnit(
-            id=self.request.id,
             name=self.request.name,
             measurement_type=self.request.measurement_type,
         )

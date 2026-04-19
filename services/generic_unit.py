@@ -6,6 +6,7 @@ class GenericUnitService(ProjectModelService):
     collection_name = "generic_units"
 
     def create_generic_unit(self, generic_unit: GenericUnit) -> GenericUnit:
+        self.validate_unique_field("name", generic_unit.name)
         self.insert_one_item(generic_unit)
         return generic_unit
 

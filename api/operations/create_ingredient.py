@@ -17,7 +17,6 @@ class CreateIngredientOperation(Operation):
 
     def build_ingredient(self) -> Ingredient:
         return Ingredient(
-            id=self.request.id,
             name=self.request.name,
             staple=self.request.staple,
         )

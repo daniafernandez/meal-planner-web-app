@@ -34,7 +34,7 @@ def test_create_ingredient_endpoint_translates_unexpected_errors_to_500() -> Non
 
         response = client.post(
             "/ingredients",
-            json={"id": "rice", "name": "Rice", "staple": True},
+            json={"name": "Rice", "staple": True},
         )
 
     assert response.status_code == 500
@@ -49,7 +49,7 @@ def test_create_ingredient_endpoint_translates_duplicate_resource_errors_to_409(
 
         response = client.post(
             "/ingredients",
-            json={"id": "rice", "name": "Rice", "staple": True},
+            json={"name": "Rice", "staple": True},
         )
 
     assert response.status_code == 409

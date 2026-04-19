@@ -1,8 +1,11 @@
+from uuid import UUID
+
 import pytest
 
 from api.operations import CreateIngredientOperation
 from models.api_models import IngredientResponse
 from models.ingredient.ingredient import Ingredient
+from services.errors import DuplicateResourceError
 from tests.factories import (
     build_create_ingredient_request,
     build_ingredient,
@@ -16,12 +19,12 @@ def test_create_ingredient_build_ingredient() -> None:
         ingredient_service=build_ingredient_service(),
     )
 
-    assert operation.build_ingredient() == Ingredient(
-        id="rice",
-        name="Rice",
-        staple=True,
-        units=[],
-    )
+    ingredient = operation.build_ingredient()
+
+    UUID(ingredient.id)
+    assert ingredient.name == "Rice"
+    assert ingredient.staple is True
+    assert ingredient.units == []
 
 
 def test_create_ingredient_delegates_to_service() -> None:
@@ -36,6 +39,24 @@ def test_create_ingredient_delegates_to_service() -> None:
 
     assert created_ingredient == ingredient
     assert ingredient_service.get_ingredient_by_id(ingredient.id) == ingredient
+
+
+def test_create_ingredient_rejects_duplicate_name() -> None:
+    ingredient_service = build_ingredient_service()
+    ingredient_service.create_ingredient(build_ingredient())
+    duplicate_named_ingredient = Ingredient(
+        id="brown-rice",
+        name="Rice",
+        staple=False,
+        units=[],
+    )
+    operation = CreateIngredientOperation(
+        request=build_create_ingredient_request(),
+        ingredient_service=ingredient_service,
+    )
+
+    with pytest.raises(DuplicateResourceError, match="Duplicate name 'Rice'."):
+        operation.create_ingredient(duplicate_named_ingredient)
 
 
 def test_create_ingredient_validate_created_ingredient_requires_created_ingredient() -> None:
@@ -78,7 +99,11 @@ def test_create_ingredient_execute() -> None:
     )
 
     response = operation.execute()
-    created_ingredient = ingredient_service.get_ingredient_by_id("rice")
+    assert operation.created_ingredient is not None
+    UUID(operation.created_ingredient.id)
+    created_ingredient = ingredient_service.get_ingredient_by_id(
+        operation.created_ingredient.id,
+    )
 
     assert response == IngredientResponse(ingredient=created_ingredient)
     assert operation.ingredient == created_ingredient

@@ -29,7 +29,6 @@ def build_size_generic_unit() -> GenericUnit:
 
 def build_create_generic_unit_request() -> CreateGenericUnitRequest:
     return CreateGenericUnitRequest(
-        id="bag",
         name="bag",
         measurement_type=MeasurementType.COUNT,
     )
@@ -37,7 +36,6 @@ def build_create_generic_unit_request() -> CreateGenericUnitRequest:
 
 def build_create_ingredient_request() -> CreateIngredientRequest:
     return CreateIngredientRequest(
-        id="rice",
         name="Rice",
         staple=True,
     )
@@ -96,6 +94,7 @@ def build_generic_unit_service() -> GenericUnitService:
         client=InMemoryMongoClient(),
     )
     service.collection.create_index("id", unique=True)
+    service.collection.create_index("name", unique=True)
     return service
 
 
@@ -105,4 +104,5 @@ def build_ingredient_service() -> IngredientService:
         client=InMemoryMongoClient(),
     )
     service.collection.create_index("id", unique=True)
+    service.collection.create_index("name", unique=True)
     return service
