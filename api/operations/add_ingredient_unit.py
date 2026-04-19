@@ -1,7 +1,7 @@
 from api.operations.base import Operation
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
 from models.api_models import AddIngredientUnitRequest, IngredientUnitResponse
 from services.errors import ResourceNotFoundError
 from services.generic_unit import GenericUnitService
@@ -24,12 +24,24 @@ class AddIngredientUnitOperation(Operation):
         self.ingredient_unit: IngredientUnit | None = None
 
     def validate_generic_unit_id(self) -> GenericUnit:
-        generic_unit = self.generic_unit_service.get_generic_unit_by_id(self.request.generic_unit_id)
+        return self.validate_generic_unit_exists(self.request.generic_unit_id)
+
+    def validate_generic_unit_exists(self, generic_unit_id: str) -> GenericUnit:
+        generic_unit = self.generic_unit_service.get_generic_unit_by_id(generic_unit_id)
         if generic_unit is None:
             raise ResourceNotFoundError(
-                f"Generic unit '{self.request.generic_unit_id}' was not found.",
+                f"Generic unit '{generic_unit_id}' was not found.",
             )
         return generic_unit
+
+    def build_size_description(self) -> SizeDescription | None:
+        if self.request.size is None:
+            return None
+
+        return SizeDescription(
+            quantity=self.request.size.quantity,
+            generic_unit=self.validate_generic_unit_exists(self.request.size.generic_unit_id),
+        )
 
     def add_generic_unit_to_ingredient(
         self,
@@ -38,7 +50,7 @@ class AddIngredientUnitOperation(Operation):
         return self.ingredient_service.add_unit_to_ingredient(
             ingredient_id=self.ingredient_id,
             generic_unit=generic_unit,
-            size=self.request.size,
+            size=self.build_size_description(),
             gram_weight=self.request.gram_weight,
         )
 

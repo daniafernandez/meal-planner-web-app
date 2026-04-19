@@ -5,7 +5,7 @@ from models.api_models import (
 )
 from models.generic_unit import GenericUnit, MeasurementType
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
 from tests.in_memory_mongo import InMemoryMongoClient, MockMongoSettings
@@ -16,6 +16,14 @@ def build_generic_unit() -> GenericUnit:
         id="bag",
         name="bag",
         measurement_type=MeasurementType.COUNT,
+    )
+
+
+def build_size_generic_unit() -> GenericUnit:
+    return GenericUnit(
+        id="lb",
+        name="lb",
+        measurement_type=MeasurementType.MASS,
     )
 
 
@@ -38,15 +46,28 @@ def build_create_ingredient_request() -> CreateIngredientRequest:
 def build_add_ingredient_unit_request() -> AddIngredientUnitRequest:
     return AddIngredientUnitRequest(
         generic_unit_id="bag",
-        size="5lb",
+        size={
+            "quantity": 5,
+            "generic_unit_id": "lb",
+        },
         gram_weight=2268.0,
     )
 
 
-def build_ingredient_unit(generic_unit: GenericUnit | None = None) -> IngredientUnit:
+def build_size_description(generic_unit: GenericUnit | None = None) -> SizeDescription:
+    return SizeDescription(
+        quantity=5,
+        generic_unit=generic_unit or build_size_generic_unit(),
+    )
+
+
+def build_ingredient_unit(
+    generic_unit: GenericUnit | None = None,
+    size: SizeDescription | None = None,
+) -> IngredientUnit:
     return IngredientUnit(
         generic_unit=generic_unit or build_generic_unit(),
-        size="5lb",
+        size=size if size is not None else build_size_description(),
         gram_weight=2268.0,
     )
 

@@ -21,9 +21,14 @@ class CreateIngredientRequest(BaseModel):
     staple: bool = False
 
 
+class AddIngredientUnitSizeRequest(BaseModel):
+    quantity: int = Field(gt=0)
+    generic_unit_id: str
+
+
 class AddIngredientUnitRequest(BaseModel):
     generic_unit_id: str
-    size: str | None = None
+    size: AddIngredientUnitSizeRequest | None = None
     gram_weight: float = Field(gt=0)
 
 
