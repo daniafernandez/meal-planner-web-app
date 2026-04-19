@@ -1,5 +1,6 @@
+from typing import Any, Protocol
+
 from pymongo import MongoClient
-from pymongo.collection import Collection
 from pymongo.errors import DuplicateKeyError
 
 from models.project_model import ProjectModel
@@ -7,14 +8,51 @@ from settings import MongoSettings
 from services.errors import DuplicateResourceError
 
 
+class MongoSettingsProtocol(Protocol):
+    uri: str
+    database: str
+
+
+class InsertOneResultProtocol(Protocol):
+    inserted_id: Any
+
+
+class InsertManyResultProtocol(Protocol):
+    inserted_ids: list[Any]
+
+
+class UpdateResultProtocol(Protocol):
+    matched_count: int
+
+
+class CollectionProtocol(Protocol):
+    def create_index(self, key: str, unique: bool = False) -> Any: ...
+
+    def insert_one(self, doc: dict[str, Any]) -> InsertOneResultProtocol: ...
+
+    def insert_many(self, docs: list[dict[str, Any]]) -> InsertManyResultProtocol: ...
+
+    def find_one(self, filter: dict[str, Any]) -> dict[str, Any] | None: ...
+
+    def update_one(self, filter: dict[str, Any], update: dict[str, Any]) -> UpdateResultProtocol: ...
+
+
+class DatabaseProtocol(Protocol):
+    def __getitem__(self, collection_name: str) -> CollectionProtocol: ...
+
+
+class MongoClientProtocol(Protocol):
+    def __getitem__(self, database_name: str) -> DatabaseProtocol: ...
+
+
 class ProjectModelService:
     collection_name: str | None = None
 
     def __init__(
         self,
-        settings: MongoSettings | None = None,
-        client: MongoClient | None = None,
-        collection: Collection | None = None,
+        settings: MongoSettingsProtocol | None = None,
+        client: MongoClientProtocol | None = None,
+        collection: CollectionProtocol | None = None,
     ):
         if collection is not None:
             self.collection = collection
