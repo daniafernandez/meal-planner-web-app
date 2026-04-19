@@ -1,8 +1,9 @@
 MONGODB_URI ?= mongodb://localhost:27017
 MONGODB_DB ?= meal_planner
 PYTHON ?= .venv/bin/python
+NEW_VERSION ?=
 
-.PHONY: server test unit-tests
+.PHONY: server test unit-tests bump-version
 
 server:
 	MONGODB_URI="$(MONGODB_URI)" MONGODB_DB="$(MONGODB_DB)" $(PYTHON) -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
@@ -10,3 +11,9 @@ server:
 test:
 	MONGODB_URI="$(MONGODB_URI)" MONGODB_DB="$(MONGODB_DB)" $(PYTHON) -m pytest
 
+unit-tests: test
+
+bump-version:
+	@test -n "$(NEW_VERSION)" || (echo "Usage: make bump-version NEW_VERSION=0.1.2" && exit 1)
+	uv version "$(NEW_VERSION)" --no-sync
+	printf "%s\n" "$(NEW_VERSION)" > VERSION

@@ -25,13 +25,17 @@ class CreateIngredientOperation(Operation):
     def create_ingredient(self, ingredient: Ingredient) -> Ingredient:
         return self.ingredient_service.create_ingredient(ingredient)
 
-    @property
-    def response(self) -> IngredientResponse:
+    def validate_created_ingredient(self) -> Ingredient:
         if self.created_ingredient is None:
             raise ValueError("created_ingredient must be set before building a response.")
+        return self.created_ingredient
+
+    @property
+    def response(self) -> IngredientResponse:
         return IngredientResponse(ingredient=self.created_ingredient)
 
     def execute(self) -> IngredientResponse:
         self.ingredient = self.build_ingredient()
         self.created_ingredient = self.create_ingredient(self.ingredient)
+        self.validate_created_ingredient()
         return self.response

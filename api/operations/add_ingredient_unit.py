@@ -42,12 +42,15 @@ class AddIngredientUnitOperation(Operation):
             gram_weight=self.request.gram_weight,
         )
 
-    @property
-    def response(self) -> IngredientUnitResponse:
+    def validate_ingredient_unit_response_state(self) -> tuple[Ingredient, IngredientUnit]:
         if self.ingredient is None or self.ingredient_unit is None:
             raise ValueError(
                 "ingredient and ingredient_unit must be set before building a response.",
             )
+        return self.ingredient, self.ingredient_unit
+
+    @property
+    def response(self) -> IngredientUnitResponse:
         return IngredientUnitResponse(
             ingredient=self.ingredient,
             ingredient_unit=self.ingredient_unit,
@@ -58,4 +61,5 @@ class AddIngredientUnitOperation(Operation):
         self.ingredient, self.ingredient_unit = self.add_generic_unit_to_ingredient(
             generic_unit=generic_unit,
         )
+        self.validate_ingredient_unit_response_state()
         return self.response

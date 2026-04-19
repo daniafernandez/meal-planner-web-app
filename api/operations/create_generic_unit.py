@@ -25,13 +25,17 @@ class CreateGenericUnitOperation(Operation):
     def create_generic_unit(self, generic_unit: GenericUnit) -> GenericUnit:
         return self.generic_unit_service.create_generic_unit(generic_unit)
 
-    @property
-    def response(self) -> GenericUnitResponse:
+    def validate_created_generic_unit(self) -> GenericUnit:
         if self.created_generic_unit is None:
             raise ValueError("created_generic_unit must be set before building a response.")
+        return self.created_generic_unit
+
+    @property
+    def response(self) -> GenericUnitResponse:
         return GenericUnitResponse(generic_unit=self.created_generic_unit)
 
     def execute(self) -> GenericUnitResponse:
         self.generic_unit = self.build_generic_unit()
         self.created_generic_unit = self.create_generic_unit(self.generic_unit)
+        self.validate_created_generic_unit()
         return self.response
