@@ -111,14 +111,29 @@ def test_create_generic_unit_delegates_to_service(generic_unit, create_generic_u
     assert generic_unit_service.created_generic_unit == generic_unit
 
 
-def test_create_generic_unit_response_property_requires_created_unit(create_generic_unit_request) -> None:
+def test_create_generic_unit_validate_created_generic_unit_requires_created_unit(
+    create_generic_unit_request,
+) -> None:
     operation = CreateGenericUnitOperation(
         request=create_generic_unit_request,
         generic_unit_service=StubGenericUnitService(),
     )
 
     with pytest.raises(ValueError, match="created_generic_unit must be set"):
-        _ = operation.response
+        operation.validate_created_generic_unit()
+
+
+def test_create_generic_unit_validate_created_generic_unit(
+    create_generic_unit_request,
+    generic_unit,
+) -> None:
+    operation = CreateGenericUnitOperation(
+        request=create_generic_unit_request,
+        generic_unit_service=StubGenericUnitService(),
+    )
+    operation.created_generic_unit = generic_unit
+
+    assert operation.validate_created_generic_unit() == generic_unit
 
 
 def test_create_generic_unit_response_property(create_generic_unit_request, generic_unit) -> None:
@@ -172,14 +187,29 @@ def test_create_ingredient_delegates_to_service(ingredient, create_ingredient_re
     assert ingredient_service.created_ingredient == ingredient
 
 
-def test_create_ingredient_response_property_requires_created_ingredient(create_ingredient_request) -> None:
+def test_create_ingredient_validate_created_ingredient_requires_created_ingredient(
+    create_ingredient_request,
+) -> None:
     operation = CreateIngredientOperation(
         request=create_ingredient_request,
         ingredient_service=StubIngredientService(),
     )
 
     with pytest.raises(ValueError, match="created_ingredient must be set"):
-        _ = operation.response
+        operation.validate_created_ingredient()
+
+
+def test_create_ingredient_validate_created_ingredient(
+    create_ingredient_request,
+    ingredient,
+) -> None:
+    operation = CreateIngredientOperation(
+        request=create_ingredient_request,
+        ingredient_service=StubIngredientService(),
+    )
+    operation.created_ingredient = ingredient
+
+    assert operation.validate_created_ingredient() == ingredient
 
 
 def test_create_ingredient_response_property(create_ingredient_request, ingredient) -> None:
@@ -229,14 +259,24 @@ def test_get_ingredient_validate_ingredient_id_not_found() -> None:
         operation.validate_ingredient_id()
 
 
-def test_get_ingredient_response_property_requires_ingredient() -> None:
+def test_get_ingredient_validate_ingredient_requires_ingredient() -> None:
     operation = GetIngredientOperation(
         ingredient_id="rice",
         ingredient_service=StubIngredientService(),
     )
 
     with pytest.raises(ValueError, match="ingredient must be set"):
-        _ = operation.response
+        operation.validate_ingredient()
+
+
+def test_get_ingredient_validate_ingredient(ingredient) -> None:
+    operation = GetIngredientOperation(
+        ingredient_id="rice",
+        ingredient_service=StubIngredientService(),
+    )
+    operation.ingredient = ingredient
+
+    assert operation.validate_ingredient() == ingredient
 
 
 def test_get_ingredient_response_property(ingredient) -> None:
@@ -313,7 +353,9 @@ def test_add_ingredient_unit_delegates_to_service(
     }
 
 
-def test_add_ingredient_unit_response_property_requires_state(add_ingredient_unit_request) -> None:
+def test_add_ingredient_unit_validate_response_state_requires_state(
+    add_ingredient_unit_request,
+) -> None:
     operation = AddIngredientUnitOperation(
         ingredient_id="rice",
         request=add_ingredient_unit_request,
@@ -322,7 +364,24 @@ def test_add_ingredient_unit_response_property_requires_state(add_ingredient_uni
     )
 
     with pytest.raises(ValueError, match="ingredient and ingredient_unit must be set"):
-        _ = operation.response
+        operation.validate_ingredient_unit_response_state()
+
+
+def test_add_ingredient_unit_validate_response_state(
+    ingredient,
+    ingredient_unit,
+    add_ingredient_unit_request,
+) -> None:
+    operation = AddIngredientUnitOperation(
+        ingredient_id="rice",
+        request=add_ingredient_unit_request,
+        ingredient_service=StubIngredientService(),
+        generic_unit_service=StubGenericUnitService(),
+    )
+    operation.ingredient = ingredient
+    operation.ingredient_unit = ingredient_unit
+
+    assert operation.validate_ingredient_unit_response_state() == (ingredient, ingredient_unit)
 
 
 def test_add_ingredient_unit_response_property(

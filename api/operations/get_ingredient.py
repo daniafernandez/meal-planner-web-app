@@ -21,12 +21,16 @@ class GetIngredientOperation(Operation):
             raise ResourceNotFoundError(f"Ingredient '{self.ingredient_id}' was not found.")
         return ingredient
 
-    @property
-    def response(self) -> IngredientResponse:
+    def validate_ingredient(self) -> Ingredient:
         if self.ingredient is None:
             raise ValueError("ingredient must be set before building a response.")
+        return self.ingredient
+
+    @property
+    def response(self) -> IngredientResponse:
         return IngredientResponse(ingredient=self.ingredient)
 
     def execute(self) -> IngredientResponse:
         self.ingredient = self.validate_ingredient_id()
+        self.validate_ingredient()
         return self.response
