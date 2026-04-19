@@ -1,6 +1,6 @@
 [project]
 name = "meal-planning-web-app"
-version = "0.1.2"
+version = "0.1.3"
 description = "Meal planning web app"
 readme = "README.md"
 requires-python = ">=3.12"
