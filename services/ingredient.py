@@ -1,6 +1,6 @@
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
 from services.errors import ResourceNotFoundError
 from services.project_model import ProjectModelService
 
@@ -22,7 +22,7 @@ class IngredientService(ProjectModelService):
         self,
         ingredient_id: str,
         generic_unit: GenericUnit,
-        size: str | None,
+        size: SizeDescription | None,
         gram_weight: float,
     ) -> tuple[Ingredient, IngredientUnit]:
         ingredient_unit = IngredientUnit(

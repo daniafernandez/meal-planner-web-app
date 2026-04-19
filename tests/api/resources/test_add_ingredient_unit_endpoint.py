@@ -52,7 +52,14 @@ def test_add_ingredient_unit_endpoint_translates_unexpected_errors_to_500() -> N
 
         response = client.post(
             "/ingredients/rice/units",
-            json={"generic_unit_id": "bag", "size": "5lb", "gram_weight": 2268.0},
+            json={
+                "generic_unit_id": "bag",
+                "size": {
+                    "quantity": 5,
+                    "generic_unit_id": "lb",
+                },
+                "gram_weight": 2268.0,
+            },
         )
 
     assert response.status_code == 500
@@ -69,7 +76,14 @@ def test_add_ingredient_unit_endpoint_translates_not_found_errors_to_404() -> No
 
         response = client.post(
             "/ingredients/rice/units",
-            json={"generic_unit_id": "bag", "size": "5lb", "gram_weight": 2268.0},
+            json={
+                "generic_unit_id": "bag",
+                "size": {
+                    "quantity": 5,
+                    "generic_unit_id": "lb",
+                },
+                "gram_weight": 2268.0,
+            },
         )
 
     assert response.status_code == 404

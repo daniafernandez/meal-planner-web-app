@@ -11,6 +11,7 @@ from tests.factories import (
     build_ingredient_service,
     build_ingredient_unit,
     build_ingredient_without_units,
+    build_size_generic_unit,
 )
 
 
@@ -42,6 +43,20 @@ def test_add_ingredient_unit_validate_generic_unit_id_not_found() -> None:
         operation.validate_generic_unit_id()
 
 
+def test_add_ingredient_unit_build_size_description_requires_size_generic_unit() -> None:
+    generic_unit_service = build_generic_unit_service()
+    generic_unit_service.create_generic_unit(build_generic_unit())
+    operation = AddIngredientUnitOperation(
+        ingredient_id="rice",
+        request=build_add_ingredient_unit_request(),
+        ingredient_service=build_ingredient_service(),
+        generic_unit_service=generic_unit_service,
+    )
+
+    with pytest.raises(ResourceNotFoundError, match="Generic unit 'lb' was not found."):
+        operation.build_size_description()
+
+
 def test_add_ingredient_unit_delegates_to_service() -> None:
     generic_unit = build_generic_unit()
     ingredient_unit = build_ingredient_unit(generic_unit=generic_unit)
@@ -50,6 +65,7 @@ def test_add_ingredient_unit_delegates_to_service() -> None:
     generic_unit_service = build_generic_unit_service()
     ingredient_service.create_ingredient(build_ingredient_without_units())
     generic_unit_service.create_generic_unit(generic_unit)
+    generic_unit_service.create_generic_unit(build_size_generic_unit())
     operation = AddIngredientUnitOperation(
         ingredient_id="rice",
         request=build_add_ingredient_unit_request(),
@@ -116,6 +132,7 @@ def test_add_ingredient_unit_execute() -> None:
     generic_unit_service = build_generic_unit_service()
     ingredient_service.create_ingredient(build_ingredient_without_units())
     generic_unit_service.create_generic_unit(generic_unit)
+    generic_unit_service.create_generic_unit(build_size_generic_unit())
     operation = AddIngredientUnitOperation(
         ingredient_id="rice",
         request=build_add_ingredient_unit_request(),
