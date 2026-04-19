@@ -1,8 +1,8 @@
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
-from services.errors import ResourceNotFoundError
-from services.project_model import ProjectModelService
+from services.errors import DuplicateResourceError
+from services.project_model import ProjectModelService, UpdateResultProtocol
 
 
 class IngredientService(ProjectModelService):
@@ -25,23 +25,57 @@ class IngredientService(ProjectModelService):
         generic_unit: GenericUnit,
         size: SizeDescription | None,
         gram_weight: float,
-    ) -> tuple[Ingredient, IngredientUnit]:
+    ) -> tuple[UpdateResultProtocol, IngredientUnit]:
         ingredient_unit = IngredientUnit(
             generic_unit=generic_unit,
             size=size,
             gram_weight=gram_weight,
         )
-        result = self.collection.update_one(
+        self.validate_ingredient_unit_is_unique(ingredient_id, ingredient_unit)
+        update_result = self.push_ingredient_unit(
+            ingredient_id=ingredient_id,
+            ingredient_unit=ingredient_unit,
+        )
+        return update_result, ingredient_unit
+
+    def validate_ingredient_unit_is_unique(
+        self,
+        ingredient_id: str,
+        ingredient_unit: IngredientUnit,
+    ) -> None:
+        ingredient = self.get_ingredient_by_id(ingredient_id)
+        if ingredient is None:
+            return
+
+        for existing_unit in ingredient.units:
+            if (
+                existing_unit.generic_unit.id == ingredient_unit.generic_unit.id
+                and self.sizes_match(existing_unit.size, ingredient_unit.size)
+            ):
+                raise DuplicateResourceError(
+                    f"Ingredient '{ingredient_id}' already has unit '{ingredient_unit.name}'.",
+                )
+
+    @staticmethod
+    def sizes_match(
+        existing_size: SizeDescription | None,
+        new_size: SizeDescription | None,
+    ) -> bool:
+        if existing_size is None and new_size is None:
+            return True
+        if existing_size is None or new_size is None:
+            return False
+        return (
+            existing_size.quantity == new_size.quantity
+            and existing_size.generic_unit.id == new_size.generic_unit.id
+        )
+
+    def push_ingredient_unit(
+        self,
+        ingredient_id: str,
+        ingredient_unit: IngredientUnit,
+    ) -> UpdateResultProtocol:
+        return self.collection.update_one(
             {"id": ingredient_id},
             {"$push": {"units": ingredient_unit.model_dump()}},
         )
-        if result.matched_count == 0:
-            raise ResourceNotFoundError(f"Ingredient '{ingredient_id}' was not found.")
-
-        updated_ingredient = self.get_ingredient_by_id(ingredient_id)
-        if updated_ingredient is None:
-            raise ResourceNotFoundError(
-                f"Ingredient '{ingredient_id}' was not found after update.",
-            )
-
-        return updated_ingredient, ingredient_unit

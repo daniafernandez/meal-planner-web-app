@@ -6,6 +6,7 @@ from models.api_models import AddIngredientUnitRequest, IngredientUnitResponse
 from services.errors import ResourceNotFoundError
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
+from services.project_model import UpdateResultProtocol
 
 
 class AddIngredientUnitOperation(Operation):
@@ -22,6 +23,7 @@ class AddIngredientUnitOperation(Operation):
         self.generic_unit_service = generic_unit_service or GenericUnitService()
         self.ingredient: Ingredient | None = None
         self.ingredient_unit: IngredientUnit | None = None
+        self.update_result: UpdateResultProtocol | None = None
 
     def validate_generic_unit_id(self) -> GenericUnit:
         return self.validate_generic_unit_exists(self.request.generic_unit_id)
@@ -46,7 +48,7 @@ class AddIngredientUnitOperation(Operation):
     def add_generic_unit_to_ingredient(
         self,
         generic_unit: GenericUnit,
-    ) -> tuple[Ingredient, IngredientUnit]:
+    ) -> tuple[UpdateResultProtocol, IngredientUnit]:
         return self.ingredient_service.add_unit_to_ingredient(
             ingredient_id=self.ingredient_id,
             generic_unit=generic_unit,
@@ -70,8 +72,9 @@ class AddIngredientUnitOperation(Operation):
 
     def execute(self) -> IngredientUnitResponse:
         generic_unit = self.validate_generic_unit_id()
-        self.ingredient, self.ingredient_unit = self.add_generic_unit_to_ingredient(
+        self.update_result, self.ingredient_unit = self.add_generic_unit_to_ingredient(
             generic_unit=generic_unit,
         )
+        self.ingredient = self.ingredient_service.get_ingredient_by_id(self.ingredient_id)
         self.validate_ingredient_unit_response_state()
         return self.response
