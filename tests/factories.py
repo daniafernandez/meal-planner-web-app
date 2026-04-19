@@ -3,7 +3,7 @@ from models.api_models import (
     CreateGenericUnitRequest,
     CreateIngredientRequest,
 )
-from models.generic_unit import GenericUnit, MeasurementType
+from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
 from services.generic_unit import GenericUnitService
@@ -15,7 +15,6 @@ def build_generic_unit() -> GenericUnit:
     return GenericUnit(
         id="bag",
         name="bag",
-        measurement_type=MeasurementType.COUNT,
     )
 
 
@@ -23,14 +22,12 @@ def build_size_generic_unit() -> GenericUnit:
     return GenericUnit(
         id="lb",
         name="lb",
-        measurement_type=MeasurementType.MASS,
     )
 
 
 def build_create_generic_unit_request() -> CreateGenericUnitRequest:
     return CreateGenericUnitRequest(
         name="bag",
-        measurement_type=MeasurementType.COUNT,
     )
 
 

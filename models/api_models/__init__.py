@@ -1,13 +1,12 @@
 from pydantic import BaseModel, Field
 
-from models.generic_unit import GenericUnit, MeasurementType
+from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from models.ingredient.ingredient_unit import IngredientUnit
 
 
 class CreateGenericUnitRequest(BaseModel):
     name: str
-    measurement_type: MeasurementType
 
 
 class GenericUnitResponse(BaseModel):
