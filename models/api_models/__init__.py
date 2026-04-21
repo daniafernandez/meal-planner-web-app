@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import SizeDescription
 
 
 class CreateGenericUnitRequest(BaseModel):
@@ -17,15 +18,9 @@ class CreateIngredientRequest(BaseModel):
     name: str
     staple: bool = False
 
-
-class AddIngredientUnitSizeRequest(BaseModel):
-    quantity: int = Field(gt=0)
+class AddIngredientUnitRequest(IngredientUnit):
     generic_unit_id: str
-
-
-class AddIngredientUnitRequest(BaseModel):
-    generic_unit_id: str
-    size: AddIngredientUnitSizeRequest | None = None
+    size: SizeDescription | None = None
     gram_weight: float = Field(gt=0)
 
 
