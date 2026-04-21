@@ -67,8 +67,7 @@ class IngredientService(ProjectModelService):
         if existing_size is None or new_size is None:
             return False
         return (
-            existing_size.quantity == new_size.quantity
-            and existing_size.generic_unit.id == new_size.generic_unit.id
+            existing_size.description_string == new_size.description_string
         )
 
     def push_ingredient_unit(
