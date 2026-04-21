@@ -14,8 +14,10 @@ from models.ingredient.size_description import (
     QuantitativeDescription,
     SizeDescription,
 )
+from models.recipe.recipe import Recipe, RecipeIngredient
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
+from services.recipe import RecipeService
 from tests.in_memory_mongo import InMemoryMongoClient, MockMongoSettings
 
 
@@ -131,6 +133,36 @@ def build_ingredient_without_units() -> Ingredient:
     )
 
 
+def build_recipe_ingredient(
+    ingredient: Ingredient | None = None,
+    units: IngredientUnit | None = None,
+    quantity: float = 2.0,
+) -> RecipeIngredient:
+    return RecipeIngredient(
+        ingredient=ingredient or build_ingredient(),
+        units=units or build_ingredient_unit(),
+        quantity=quantity,
+    )
+
+
+def build_recipe(recipe_ingredient: RecipeIngredient | None = None) -> Recipe:
+    return Recipe(
+        id="fried-rice",
+        name="Fried Rice",
+        servings="4",
+        ingredients=[recipe_ingredient or build_recipe_ingredient()],
+    )
+
+
+def build_recipe_without_ingredients() -> Recipe:
+    return Recipe(
+        id="fried-rice",
+        name="Fried Rice",
+        servings="4",
+        ingredients=[],
+    )
+
+
 def build_generic_unit_service() -> GenericUnitService:
     service = GenericUnitService(
         settings=MockMongoSettings(),
@@ -143,6 +175,16 @@ def build_generic_unit_service() -> GenericUnitService:
 
 def build_ingredient_service() -> IngredientService:
     service = IngredientService(
+        settings=MockMongoSettings(),
+        client=InMemoryMongoClient(),
+    )
+    service.collection.create_index("id", unique=True)
+    service.collection.create_index("name", unique=True)
+    return service
+
+
+def build_recipe_service() -> RecipeService:
+    service = RecipeService(
         settings=MockMongoSettings(),
         client=InMemoryMongoClient(),
     )
