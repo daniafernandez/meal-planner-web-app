@@ -1,11 +1,19 @@
 from models.api_models import (
     AddIngredientUnitRequest,
+    AddQualitativeIngredientUnitSizeRequest,
+    AddQuantitativeIngredientUnitSizeRequest,
     CreateGenericUnitRequest,
     CreateIngredientRequest,
+    IngredientUnitSizeType,
 )
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
+from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import (
+    QualitativeDescription,
+    QuantitativeDescription,
+    SizeDescription,
+)
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
 from tests.in_memory_mongo import InMemoryMongoClient, MockMongoSettings
@@ -41,18 +49,46 @@ def build_create_ingredient_request() -> CreateIngredientRequest:
 def build_add_ingredient_unit_request() -> AddIngredientUnitRequest:
     return AddIngredientUnitRequest(
         generic_unit_id="bag",
-        size={
-            "quantity": 5,
-            "generic_unit_id": "lb",
-        },
+        size=AddQuantitativeIngredientUnitSizeRequest(
+            quantity=5,
+            generic_unit_id="lb",
+        ),
         gram_weight=2268.0,
     )
 
 
+def build_add_qualitative_ingredient_unit_request() -> AddIngredientUnitRequest:
+    return AddIngredientUnitRequest(
+        generic_unit_id="bag",
+        size=AddQualitativeIngredientUnitSizeRequest(
+            quality="large",
+        ),
+        gram_weight=300.0,
+    )
+
+
+def build_add_ingredient_unit_size_type() -> IngredientUnitSizeType:
+    return IngredientUnitSizeType.QUANTITATIVE
+
+
+def build_add_qualitative_ingredient_unit_size_type() -> IngredientUnitSizeType:
+    return IngredientUnitSizeType.QUALITATIVE
+
+
+def build_add_unit_without_size_type() -> IngredientUnitSizeType:
+    return IngredientUnitSizeType.NONE
+
+
 def build_size_description(generic_unit: GenericUnit | None = None) -> SizeDescription:
-    return SizeDescription(
+    return QuantitativeDescription(
         quantity=5,
         generic_unit=generic_unit or build_size_generic_unit(),
+    )
+
+
+def build_qualitative_size_description() -> SizeDescription:
+    return QualitativeDescription(
+        quality="large",
     )
 
 
@@ -64,6 +100,16 @@ def build_ingredient_unit(
         generic_unit=generic_unit or build_generic_unit(),
         size=size if size is not None else build_size_description(),
         gram_weight=2268.0,
+    )
+
+
+def build_qualitative_ingredient_unit(
+    generic_unit: GenericUnit | None = None,
+) -> IngredientUnit:
+    return IngredientUnit(
+        generic_unit=generic_unit or build_generic_unit(),
+        size=build_qualitative_size_description(),
+        gram_weight=300.0,
     )
 
 

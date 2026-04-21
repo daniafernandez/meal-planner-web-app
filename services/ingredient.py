@@ -1,6 +1,7 @@
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
+from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import SizeDescription
 from services.errors import DuplicateResourceError
 from services.project_model import ProjectModelService, UpdateResultProtocol
 
@@ -66,8 +67,7 @@ class IngredientService(ProjectModelService):
         if existing_size is None or new_size is None:
             return False
         return (
-            existing_size.quantity == new_size.quantity
-            and existing_size.generic_unit.id == new_size.generic_unit.id
+            existing_size.description_string == new_size.description_string
         )
 
     def push_ingredient_unit(

@@ -15,6 +15,7 @@ from models.api_models import (
     CreateGenericUnitRequest,
     IngredientResponse,
     IngredientUnitResponse,
+    IngredientUnitSizeType,
     CreateIngredientRequest,
     GenericUnitResponse,
 )
@@ -47,10 +48,12 @@ def get_get_ingredient_operation(ingredient_id: str) -> GetIngredientOperation:
 
 def get_add_ingredient_unit_operation(
     ingredient_id: str,
+    size_type: IngredientUnitSizeType,
     request: AddIngredientUnitRequest,
 ) -> AddIngredientUnitOperation:
     return AddIngredientUnitOperation(
         ingredient_id=ingredient_id,
+        size_type=size_type,
         request=request,
     )
 
@@ -136,7 +139,7 @@ def get_ingredient(
 
 
 @router.post(
-    "/ingredients/{ingredient_id}/units",
+    "/ingredients/{ingredient_id}/units/{size_type}",
     response_model=IngredientUnitResponse,
     status_code=status.HTTP_201_CREATED,
 )

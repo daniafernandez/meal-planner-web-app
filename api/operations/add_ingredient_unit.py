@@ -1,8 +1,17 @@
 from api.operations.base import Operation
 from models.generic_unit import GenericUnit
+from models.api_models import (
+    AddIngredientUnitRequest,
+    IngredientUnitResponse,
+    IngredientUnitSizeType,
+)
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
-from models.api_models import AddIngredientUnitRequest, IngredientUnitResponse
+from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import (
+    QualitativeDescription,
+    QuantitativeDescription,
+    SizeDescription,
+)
 from services.errors import ResourceNotFoundError
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
@@ -13,11 +22,13 @@ class AddIngredientUnitOperation(Operation):
     def __init__(
         self,
         ingredient_id: str,
+        size_type: IngredientUnitSizeType,
         request: AddIngredientUnitRequest,
         ingredient_service: IngredientService | None = None,
         generic_unit_service: GenericUnitService | None = None,
     ):
         self.ingredient_id = ingredient_id
+        self.size_type = size_type
         self.request = request
         self.ingredient_service = ingredient_service or IngredientService()
         self.generic_unit_service = generic_unit_service or GenericUnitService()
@@ -37,10 +48,18 @@ class AddIngredientUnitOperation(Operation):
         return generic_unit
 
     def build_size_description(self) -> SizeDescription | None:
-        if self.request.size is None:
+        if self.size_type == IngredientUnitSizeType.NONE:
             return None
 
-        return SizeDescription(
+        if self.request.size is None:
+            raise ValueError("size must be provided when size_type is not 'none'.")
+
+        if self.size_type == IngredientUnitSizeType.QUALITATIVE:
+            return QualitativeDescription(
+                quality=self.request.size.quality,
+            )
+
+        return QuantitativeDescription(
             quantity=self.request.size.quantity,
             generic_unit=self.validate_generic_unit_exists(self.request.size.generic_unit_id),
         )

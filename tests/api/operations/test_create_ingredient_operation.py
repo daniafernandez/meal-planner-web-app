@@ -22,7 +22,7 @@ def test_create_ingredient_build_ingredient() -> None:
     ingredient = operation.build_ingredient()
 
     UUID(ingredient.id)
-    assert ingredient.name == "Rice"
+    assert ingredient.name == "rice"
     assert ingredient.staple is True
     assert ingredient.units == []
 
@@ -55,7 +55,7 @@ def test_create_ingredient_rejects_duplicate_name() -> None:
         ingredient_service=ingredient_service,
     )
 
-    with pytest.raises(DuplicateResourceError, match="Duplicate name 'Rice'."):
+    with pytest.raises(DuplicateResourceError, match="Duplicate name 'rice'."):
         operation.create_ingredient(duplicate_named_ingredient)
 
 
