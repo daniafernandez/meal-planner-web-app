@@ -1,9 +1,10 @@
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
 
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
 from models.ingredient.ingredient_unit import IngredientUnit
-from models.ingredient.size_description import SizeDescription
 
 
 class CreateGenericUnitRequest(BaseModel):
@@ -18,9 +19,25 @@ class CreateIngredientRequest(BaseModel):
     name: str
     staple: bool = False
 
-class AddIngredientUnitRequest(IngredientUnit):
+
+class IngredientUnitSizeType(StrEnum):
+    NONE = "none"
+    QUALITATIVE = "qualitative"
+    QUANTITATIVE = "quantitative"
+
+
+class AddQuantitativeIngredientUnitSizeRequest(BaseModel):
+    quantity: int = Field(gt=0)
     generic_unit_id: str
-    size: SizeDescription | None = None
+
+
+class AddQualitativeIngredientUnitSizeRequest(BaseModel):
+    quality: str
+
+
+class AddIngredientUnitRequest(BaseModel):
+    generic_unit_id: str
+    size: AddQuantitativeIngredientUnitSizeRequest | AddQualitativeIngredientUnitSizeRequest | None = None
     gram_weight: float = Field(gt=0)
 
 
