@@ -1,20 +1,12 @@
 from pydantic import BaseModel, Field, computed_field
 
 from models.generic_unit import GenericUnit
-
-
-class SizeDescription(BaseModel):
-    quantity: int = Field(gt=0)
-    generic_unit: GenericUnit
-
-    @property
-    def description_string(self) -> str:
-        return f"{self.quantity} {self.generic_unit.name}"
+from models.ingredient.size_description import QuantitativeDescription, QualitativeDescription
 
 
 class IngredientUnit(BaseModel):
     generic_unit: GenericUnit
-    size: SizeDescription | None = None
+    size: QuantitativeDescription | QualitativeDescription | None = None # TODO: see if abstract class can be used as type here
     gram_weight: float = Field(gt=0)    # common conversion weight for this ingredient/unit pair
 
     @computed_field

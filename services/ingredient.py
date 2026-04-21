@@ -1,6 +1,7 @@
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
+from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import SizeDescription
 from services.errors import DuplicateResourceError
 from services.project_model import ProjectModelService, UpdateResultProtocol
 

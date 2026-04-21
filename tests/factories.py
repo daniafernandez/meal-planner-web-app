@@ -5,7 +5,8 @@ from models.api_models import (
 )
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
+from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import QuantitativeDescription, SizeDescription
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
 from tests.in_memory_mongo import InMemoryMongoClient, MockMongoSettings
@@ -50,7 +51,7 @@ def build_add_ingredient_unit_request() -> AddIngredientUnitRequest:
 
 
 def build_size_description(generic_unit: GenericUnit | None = None) -> SizeDescription:
-    return SizeDescription(
+    return QuantitativeDescription(
         quantity=5,
         generic_unit=generic_unit or build_size_generic_unit(),
     )

@@ -1,7 +1,8 @@
 from api.operations.base import Operation
 from models.generic_unit import GenericUnit
 from models.ingredient.ingredient import Ingredient
-from models.ingredient.ingredient_unit import IngredientUnit, SizeDescription
+from models.ingredient.ingredient_unit import IngredientUnit
+from models.ingredient.size_description import QuantitativeDescription, SizeDescription
 from models.api_models import AddIngredientUnitRequest, IngredientUnitResponse
 from services.errors import ResourceNotFoundError
 from services.generic_unit import GenericUnitService
@@ -40,7 +41,7 @@ class AddIngredientUnitOperation(Operation):
         if self.request.size is None:
             return None
 
-        return SizeDescription(
+        return QuantitativeDescription(
             quantity=self.request.size.quantity,
             generic_unit=self.validate_generic_unit_exists(self.request.size.generic_unit_id),
         )
