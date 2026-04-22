@@ -1,4 +1,5 @@
-from models.recipe.recipe import Recipe, RecipeIngredient
+from models.recipe.recipe import Recipe
+from models.recipe.recipe_ingredient import RecipeIngredient
 from services.project_model import ProjectModelService, UpdateResultProtocol
 
 

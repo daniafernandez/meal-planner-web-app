@@ -49,3 +49,18 @@ def test_recipe_service_add_ingredient_to_recipe_adds_recipe_ingredient() -> Non
     assert service.get_recipe_by_id("fried-rice") == build_recipe(
         recipe_ingredient=added_recipe_ingredient,
     )
+
+
+def test_recipe_service_add_ingredient_to_recipe_preserves_prep_descriptor() -> None:
+    service = build_recipe_service()
+    recipe = build_recipe_without_ingredients()
+    recipe_ingredient = build_recipe_ingredient(prep_descriptor="diced")
+    service.create_recipe(recipe)
+
+    service.add_ingredient_to_recipe(
+        recipe_id=recipe.id,
+        recipe_ingredient=recipe_ingredient,
+    )
+    updated_recipe = service.get_recipe_by_id("fried-rice")
+
+    assert updated_recipe.ingredients[0].prep_descriptor == "diced"
