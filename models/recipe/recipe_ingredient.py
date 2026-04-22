@@ -9,3 +9,4 @@ class RecipeIngredient(BaseModel):
     units: IngredientUnit
     quantity: float
     active: bool = True
+    prep_descriptor: str | None = None  # prep descriptor/instructions for the ingredient, like chopped, thawed, etc.

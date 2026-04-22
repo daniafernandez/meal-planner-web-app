@@ -14,7 +14,8 @@ from models.ingredient.size_description import (
     QuantitativeDescription,
     SizeDescription,
 )
-from models.recipe.recipe import Recipe, RecipeIngredient
+from models.recipe.recipe import Recipe
+from models.recipe.recipe_ingredient import RecipeIngredient
 from services.generic_unit import GenericUnitService
 from services.ingredient import IngredientService
 from services.recipe import RecipeService
@@ -137,11 +138,13 @@ def build_recipe_ingredient(
     ingredient: Ingredient | None = None,
     units: IngredientUnit | None = None,
     quantity: float = 2.0,
+    prep_descriptor: str | None = "chopped",
 ) -> RecipeIngredient:
     return RecipeIngredient(
         ingredient=ingredient or build_ingredient(),
         units=units or build_ingredient_unit(),
         quantity=quantity,
+        prep_descriptor=prep_descriptor,
     )
 
 
