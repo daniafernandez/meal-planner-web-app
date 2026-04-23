@@ -135,16 +135,12 @@ def build_ingredient_without_units() -> Ingredient:
 
 
 def build_recipe_ingredient(
-    ingredient: Ingredient | None = None,
-    units: IngredientUnit | None = None,
-    quantity: float = 2.0,
-    prep_descriptor: str | None = "chopped",
+    ingredient_line_string: str = "2 medium onions, sliced",
+    active: bool = True,
 ) -> RecipeIngredient:
     return RecipeIngredient(
-        ingredient=ingredient or build_ingredient(),
-        units=units or build_ingredient_unit(),
-        quantity=quantity,
-        prep_descriptor=prep_descriptor,
+        ingredient_line_string=ingredient_line_string,
+        active=active,
     )
 
 
